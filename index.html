@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLACK BOX</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <main class="app">
+
+    <header class="header">
+      <div>
+        <p class="eyebrow">EXPERIMENTAL COGNITIVE TECHNOLOGY</p>
+        <h1>BLACK BOX</h1>
+      </div>
+
+      <div class="status">
+        <span class="dot"></span>
+        PROTOTYPE
+      </div>
+    </header>
+
+    <section class="intro">
+      <h2>Think first. Then let the AI challenge your thinking.</h2>
+      <p>
+        Black Box is an experimental AI cognitive coach designed to
+        strengthen independent reasoning rather than replace it.
+      </p>
+    </section>
+
+    <section class="stage">
+      <span>01 / THINK FIRST</span>
+    </section>
+
+    <section class="problem-card">
+      <p class="label">DECISION PROBLEM</p>
+
+      <p>
+        Your school has limited funding to improve student wellbeing.
+        It can prioritise one option:
+      </p>
+
+      <p>
+        <strong>A.</strong> Increase access to human counsellors<br>
+        <strong>B.</strong> Introduce an AI wellbeing chatbot<br>
+        <strong>C.</strong> Create peer-support programmes
+      </p>
+
+      <p><strong>Which should the school prioritise, and why?</strong></p>
+    </section>
+
+    <section class="chat">
+
+      <div class="message ai">
+        <div class="message-label">BLACK BOX</div>
+        <p>
+          Think first. Before I help, explain what you would choose and why.
+        </p>
+      </div>
+
+    </section>
+
+    <form class="input-area" id="chat-form">
+
+      <textarea
+        id="user-input"
+        placeholder="Explain your reasoning..."
+        rows="4"
+        required
+      ></textarea>
+
+      <button type="submit">
+        SEND →
+      </button>
+
+    </form>
+
+  </main>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
