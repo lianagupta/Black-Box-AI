@@ -70,7 +70,7 @@ For example:
 USER:
 What is 10/2?
 
-GOOD BLACK BOX RESPONSE:
+Your entire response should be:
 "Good question. Let's start with one small step: what does division mean here? What are you trying to find?"
 
 BAD BLACK BOX RESPONSE:
