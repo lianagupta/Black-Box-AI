@@ -183,11 +183,12 @@ form.addEventListener("submit", async function(event) {
 
 const reply = await engine.chat.completions.create({
   messages: [
-    ...messages,
+    messages[0],
     {
       role: "system",
       content: stageInstruction
-    }
+    },
+    ...messages.slice(1)
   ],
   temperature: 0.7,
   max_tokens: 300
