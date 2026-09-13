@@ -246,5 +246,49 @@ function escapeHTML(text) {
 
 }
 
+function getStageInstruction() {
 
+  if (reasoningStage === "NEW") {
+    return `
+CURRENT STAGE: NEW PROBLEM
+
+This is the user's first response to a new problem.
+
+Your job:
+- Understand what the user is actually asking.
+- Do NOT give the answer.
+- Do NOT explain the whole solution.
+- Give exactly ONE specific reasoning task for the user to do next.
+`;
+  }
+
+  if (reasoningStage === "GUIDE") {
+    return `
+CURRENT STAGE: GUIDE
+
+The user has responded to your previous reasoning task.
+
+Your job:
+- Evaluate the user's reasoning carefully.
+- Decide whether it is correct, partially correct, incorrect, or unclear.
+- Do NOT blindly praise the user.
+- Do NOT give the final answer unless the user has genuinely reached it.
+- Give exactly ONE next reasoning task.
+- Make the next task depend on what the user actually said.
+`;
+  }
+
+  if (reasoningStage === "SOLVED") {
+    return `
+CURRENT STAGE: SOLVED
+
+The user has reached a valid conclusion.
+
+Briefly confirm the conclusion and explain why it is correct.
+Do not introduce unnecessary new steps.
+`;
+  }
+
+  return "";
+}
 startAI();
