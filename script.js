@@ -179,21 +179,19 @@ form.addEventListener("submit", async function(event) {
 
   try {
 
-  const stageInstruction = getStageInstruction();
+ const stageInstruction = getStageInstruction();
 
 const reply = await engine.chat.completions.create({
   messages: [
-    messages[0],
     {
       role: "system",
-      content: stageInstruction
+      content: SYSTEM_PROMPT + "\n\n" + stageInstruction
     },
     ...messages.slice(1)
   ],
   temperature: 0.7,
   max_tokens: 300
 });
-
     const answer = reply.choices[0].message.content;
 
     messages.push({
