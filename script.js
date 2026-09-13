@@ -114,7 +114,7 @@ Ask what evidence would help answer the question.
 
 ADAPTIVE SUPPORT:
 
-After the user responds, pay attention to what they actually said.
+After the user responds, pay attention to what they actually said
 
 If their reasoning is correct:
 - briefly acknowledge it
