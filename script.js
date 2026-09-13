@@ -9,6 +9,10 @@ const button = form.querySelector("button");
 let engine = null;
 let messages = [];
 
+let problemStarted = false;
+let reasoningStage = "NEW";
+let turnCount = 0;
+
 const SYSTEM_PROMPT = `
 You are BLACK BOX.
 
