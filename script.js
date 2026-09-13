@@ -10,6 +10,7 @@ let engine = null;
 let messages = [];
 
 let problemStarted = false;
+let originalProblem = "";
 let reasoningStage = "NEW";
 let turnCount = 0;
 
@@ -280,7 +281,10 @@ form.addEventListener("submit", async function(event) {
   input.value = "";
   button.disabled = true;
   button.textContent = "THINKING...";
-
+  
+if (reasoningStage === "NEW") {
+  originalProblem = text;
+}
   messages.push({
     role: "user",
     content: text
@@ -288,13 +292,22 @@ form.addEventListener("submit", async function(event) {
 
   try {
 
- const stageInstruction = getStageInstruction();
+const stageInstruction = getStageInstruction();
+
+const problemLock = `
+ORIGINAL PROBLEM:
+${originalProblem}
+
+IMPORTANT:
+Stay focused on this original problem throughout the conversation.
+Do not invent a different problem or reinterpret it as a different task.
+The user's later messages are responses to this original problem unless they clearly state that they want to change the problem.
+`;
 
 const reply = await engine.chat.completions.create({
-  messages: [
     {
       role: "system",
-      content: SYSTEM_PROMPT + "\n\n" + stageInstruction
+     content: SYSTEM_PROMPT + "\n\n" + problemLock + "\n\n" + stageInstruction
     },
     ...messages.slice(1)
   ],
