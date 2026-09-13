@@ -1,5 +1,5 @@
 import { CreateMLCEngine } from
-  "https://esm.run/@mlc-ai/web-llm";
+"https://esm.run/@mlc-ai/web-llm"
 
 const form = document.getElementById("chat-form");
 const input = document.getElementById("user-input");
@@ -208,6 +208,7 @@ The system should feel like it is THINKING ABOUT THE USER'S RESPONSE, not moving
 The goal is:
 LESS AI THINKING.
 MORE HUMAN THINKING.
+\`;
 
 async function startAI() {
 
