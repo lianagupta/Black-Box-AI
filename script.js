@@ -305,9 +305,10 @@ The user's later messages are responses to this original problem unless they cle
 `;
 
 const reply = await engine.chat.completions.create({
+  messages: [
     {
       role: "system",
-     content: SYSTEM_PROMPT + "\n\n" + problemLock + "\n\n" + stageInstruction
+      content: SYSTEM_PROMPT + "\n\n" + problemLock + "\n\n" + stageInstruction
     },
     ...messages.slice(1)
   ],
