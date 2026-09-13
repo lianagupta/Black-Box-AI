@@ -179,11 +179,19 @@ form.addEventListener("submit", async function(event) {
 
   try {
 
-    const reply = await engine.chat.completions.create({
-      messages: messages,
-      temperature: 0.7,
-      max_tokens: 300
-    });
+  const stageInstruction = getStageInstruction();
+
+const reply = await engine.chat.completions.create({
+  messages: [
+    ...messages,
+    {
+      role: "system",
+      content: stageInstruction
+    }
+  ],
+  temperature: 0.7,
+  max_tokens: 300
+});
 
     const answer = reply.choices[0].message.content;
 
@@ -191,7 +199,11 @@ form.addEventListener("submit", async function(event) {
       role: "assistant",
       content: answer
     });
+if (reasoningStage === "NEW") {
+  reasoningStage = "GUIDE";
+}
 
+turnCount++;
     addMessage(
       "BLACK BOX",
       answer,
