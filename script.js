@@ -223,14 +223,14 @@ async function startAI() {
 
   try {
 
-    engine = await CreateMLCEngine(
-      "Llama-3.2-1B-Instruct-q4f16_1-MLC",
-      {
-        initProgressCallback: (progress) => {
-          console.log(progress);
-        }
+  engine = await CreateMLCEngine(
+    "Qwen3-0.6B-q4f16_1-MLC",
+    {
+      initProgressCallback: (progress) => {
+        console.log(progress);
       }
-    );
+    }
+  );
 
     messages = [
       {
