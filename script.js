@@ -290,11 +290,7 @@ if (reasoningStage === "NEW") {
 
 const stageInstruction = getStageInstruction();
 
-const problemLock =
-  "ORIGINAL PROBLEM: " + originalProblem +
-  "\n\nIMPORTANT: Stay focused on this original problem throughout the conversation." +
-  "\nDo not invent a different problem or reinterpret it as a different task." +
-  "\nThe user's later messages are responses to this original problem unless they clearly state that they want to change the problem.";
+const problemLock = "ORIGINAL PROBLEM: " + originalProblem;
 
 const reply = await engine.chat.completions.create({
   messages: [
