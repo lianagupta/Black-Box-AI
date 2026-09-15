@@ -202,13 +202,14 @@ async function startAI() {
   try {
 
 engine = await CreateMLCEngine(
-"Qwen3-0.6B-q4f16_1-MLC",
-    {
-      initProgressCallback: (progress) => {
-        console.log(progress);
-      }
-    }
-  );
+  "Qwen3-0.6B-q4f16_1-MLC",
+  {
+    initProgressCallback: (progress) => {
+      console.log(progress);
+    },
+    context_window_size: 1024
+  }
+);
 
     messages = [
       {
