@@ -380,10 +380,9 @@ form.addEventListener("submit", async function(event) {
     /* Fallback if model produces nothing useful */
 
     if (!cleanAnswer) {
-
-      cleanAnswer =
-        "Let's start with one small step. What part of the problem do you understand already?";
-    }
+  console.error("BLACK BOX EMPTY RESPONSE:", answer);
+  return;
+}
 
 
     /* Store assistant response */
