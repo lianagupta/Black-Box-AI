@@ -303,27 +303,26 @@ const reply = await engine.chat.completions.create({
   temperature: 0.7,
   max_tokens: 300
 });
-    const answer = reply.choices[0].message.content;
+const answer = reply.choices[0].message.content;
 
-    messages.push({
-      role: "assistant",
-      content: answer
-    });
-if (reasoningStage === "NEW") {
-  reasoningStage = "GUIDE";
-}
+const cleanAnswer = answer.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
 
+messages.push({
+  role: "assistant",
+  content: cleanAnswer
+});
 turnCount++;
-    addMessage(
-      "BLACK BOX",
-      answer,
-      "ai"
-    );
 
-  } catch (error) {
+addMessage(
+  "BLACK BOX",
+  cleanAnswer,
+  "ai"
+);
 
-    console.error(error);
+} catch (error) {
 
+  console.error(error);
+    
     addMessage(
       "BLACK BOX",
       "Something went wrong while generating the next reasoning step.",
