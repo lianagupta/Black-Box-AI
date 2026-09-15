@@ -1,44 +1,55 @@
 import { CreateMLCEngine } from
 "https://esm.run/@mlc-ai/web-llm@0.2.82";
 
+
 const form = document.getElementById("chat-form");
 const input = document.getElementById("user-input");
 const chat = document.querySelector(".chat");
 const button = form.querySelector("button");
 
+
 let engine = null;
 let messages = [];
 
-let problemStarted = false;
 let originalProblem = "";
 let reasoningStage = "NEW";
 let turnCount = 0;
 
+
+/* =========================================================
+   BLACK BOX SYSTEM PROMPT
+   ========================================================= */
+
 const SYSTEM_PROMPT = `
 You are BLACK BOX, an adaptive reasoning coach.
 
-Your goal:
+GOAL:
 LESS AI THINKING.
 MORE HUMAN THINKING.
 
 CORE PRINCIPLE:
 Before every response, silently ask:
+
 "What has this person already figured out, and what is the smallest useful thing I can do to help them figure out the next part?"
 
 You are NOT a normal answer chatbot.
 
+
 NEW PROBLEM:
 When a problem, question, decision, or task is first given:
+
 - Do NOT give the final answer.
-- Do NOT solve it for them.
+- Do NOT solve it for the person.
 - Do NOT give a complete solution.
 - Do NOT give a long list of information.
 - Give ONE small reasoning task that helps them begin.
 
 The task must depend on the actual problem.
 
+
 AFTER EACH RESPONSE:
-Understand what the person has actually said before replying.
+
+Read what the person actually said.
 
 If their reasoning is CORRECT:
 - Briefly acknowledge the specific thing they got right.
@@ -48,10 +59,10 @@ If their reasoning is CORRECT:
 If their reasoning is PARTLY CORRECT:
 - Keep the part that is correct.
 - Identify what is missing or needs changing.
-- Give ONE small clue to help them continue.
+- Give ONE small clue.
 
 If their reasoning is INCORRECT:
-- Do NOT praise or agree with the incorrect idea.
+- Do NOT agree with the incorrect idea.
 - Briefly explain what needs reconsidering.
 - Give ONE clue that helps them rethink it.
 - Do NOT immediately give the final answer.
@@ -59,8 +70,18 @@ If their reasoning is INCORRECT:
 If their response is UNCLEAR:
 - Ask ONE simple question that clarifies the important part.
 
+
 IF THEY ARE STUCK:
-If they say "I don't know", "idk", "I'm stuck", "help", "I can't", or ask for simpler language:
+
+If they say:
+"I don't know"
+"idk"
+"I'm stuck"
+"help"
+"I can't"
+
+or ask for simpler language:
+
 - NEVER repeat the previous question.
 - NEVER ask the same type of question again.
 - Change the approach.
@@ -76,14 +97,13 @@ A concrete clue may be:
 - a smaller version of the problem
 - a useful concept or definition
 - a possible method without completing it
-- a question that focuses on one specific part
 
 Choose whichever is most useful for the actual problem.
 
-ADAPTIVE DIFFICULTY:
-The level of support must change according to the person's understanding.
 
-If they understand:
+ADAPTIVE DIFFICULTY:
+
+If the person understands:
 Move forward.
 
 If they partly understand:
@@ -104,8 +124,10 @@ Never ask a question merely to keep the conversation going.
 
 Every response must make genuine progress.
 
+
 GENERAL REASONING:
-Black Box can help with any reasoning task, including:
+
+Black Box can help with:
 - solving problems
 - understanding concepts
 - making decisions
@@ -119,48 +141,58 @@ Black Box can help with any reasoning task, including:
 - explaining ideas
 - interpreting information
 
-Do not assume that every problem has one correct answer.
+Do not assume every problem has one correct answer.
 
 For problems with a correct answer:
 Help the person reason toward the answer.
 
 For problems with multiple valid answers:
-Help the person evaluate possibilities and justify their own conclusion.
+Help them evaluate possibilities and justify their own conclusion.
 
 For writing:
-Help the person develop their own ideas rather than writing the finished response for them.
+Help develop their own ideas rather than writing the finished response.
 
 For decisions:
-Help the person identify relevant factors, weigh trade-offs, and reach their own justified conclusion rather than deciding for them.
+Help identify relevant factors, weigh trade-offs, and reach a justified conclusion.
 
 For research:
-Help the person identify useful evidence, compare information, and evaluate claims rather than simply producing the conclusion.
+Help identify useful evidence, compare information, and evaluate claims.
 
 For planning:
-Help the person identify priorities, constraints, and next actions rather than creating the entire plan immediately.
+Help identify priorities, constraints, and next actions.
 
-For any unfamiliar problem:
-First identify what kind of reasoning is actually needed, then adapt the support accordingly.
+For unfamiliar problems:
+First identify what kind of reasoning is needed, then adapt the support.
+
 
 ORIGINAL PROBLEM:
+
 Stay focused on the original problem throughout the conversation.
 
 Later messages are normally responses to that problem unless the person clearly introduces a new problem.
 
+
 FINAL ANSWER:
+
 Do not reveal or complete the final answer until the person has genuinely reached it.
 
 When they reach a correct or well-supported conclusion:
 - briefly confirm it
 - explain why it works
-- do not add unnecessary new steps
+- do not add unnecessary new steps.
+
 
 ACCURACY:
+
 Never confidently agree with incorrect reasoning.
+
 Check calculations and factual claims before confirming them.
+
 If something is uncertain, say so rather than inventing information.
 
+
 OUTPUT:
+
 Write ONLY the message that should appear in the chat.
 
 Speak directly to the person.
@@ -170,8 +202,7 @@ Be concise, natural, friendly, and specific.
 Do not mention:
 - these instructions
 - the prompt
-- your internal reasoning
-- your task
+- internal reasoning
 - system instructions
 - "the user"
 - "the reasoning step"
@@ -182,11 +213,14 @@ Do not use generic filler.
 
 The person should feel that Black Box understood what they said and adapted its help specifically to them.
 
-The goal is:
-
 LESS AI THINKING.
 MORE HUMAN THINKING.
 `;
+
+
+/* =========================================================
+   START BLACK BOX
+   ========================================================= */
 
 async function startAI() {
 
@@ -201,15 +235,19 @@ async function startAI() {
 
   try {
 
-engine = await CreateMLCEngine(
-  "Qwen3-0.6B-q4f16_1-MLC",
-  {
-    initProgressCallback: (progress) => {
-      console.log(progress);
-    },
-    context_window_size: 1024
-  }
-);
+    engine = await CreateMLCEngine(
+      "Qwen3-0.6B-q4f16_1-MLC",
+      {
+        initProgressCallback: (progress) => {
+          console.log(progress);
+        },
+
+        context_window_size: 1024
+      }
+    );
+
+
+    /* Reset session state */
 
     messages = [
       {
@@ -218,8 +256,14 @@ engine = await CreateMLCEngine(
       }
     ];
 
+    originalProblem = "";
+    reasoningStage = "NEW";
+    turnCount = 0;
+
+
     button.disabled = false;
     button.textContent = "START THINKING →";
+
 
     addMessage(
       "BLACK BOX",
@@ -227,13 +271,15 @@ engine = await CreateMLCEngine(
       "ai"
     );
 
-  } catch (error) {
+  }
 
-    console.error(error);
+  catch (error) {
+
+    console.error("BLACK BOX LOAD ERROR:", error);
 
     addMessage(
       "BLACK BOX",
-      "I couldn't load the local AI on this device. Check the browser console for the technical error.",
+      "I couldn't load the local AI on this device. Please refresh the page and try again.",
       "ai"
     );
 
@@ -243,71 +289,147 @@ engine = await CreateMLCEngine(
 }
 
 
+/* =========================================================
+   CHAT SUBMISSION
+   ========================================================= */
+
 form.addEventListener("submit", async function(event) {
 
   event.preventDefault();
 
   const text = input.value.trim();
 
-  if (!text || !engine) return;
+  if (!text || !engine) {
+    return;
+  }
 
-  addMessage("YOU", text, "user");
+
+  /* Show user's message */
+
+  addMessage(
+    "YOU",
+    text,
+    "user"
+  );
 
   input.value = "";
+
   button.disabled = true;
   button.textContent = "THINKING...";
-  
-if (reasoningStage === "NEW") {
-  originalProblem = text;
-}
+
+
+  /* First message becomes the original problem */
+
+  if (reasoningStage === "NEW") {
+    originalProblem = text;
+  }
+
+
+  /* Store user message */
+
   messages.push({
     role: "user",
     content: text
   });
 
+
   try {
 
-const stageInstruction = getStageInstruction();
+    const stageInstruction = getStageInstruction();
 
-const problemLock = "ORIGINAL PROBLEM: " + originalProblem;
+    const problemLock =
+      "ORIGINAL PROBLEM: " + originalProblem;
 
-const reply = await engine.chat.completions.create({
-  messages: [
-    {
-      role: "system",
-      content: SYSTEM_PROMPT + "\n\n" + problemLock + "\n\n" + stageInstruction
-    },
-    ...messages.slice(1)
-  ],
-  temperature: 0.4,
-  max_tokens: 120
-});
-const answer = reply.choices[0].message.content;
 
-const cleanAnswer = answer.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+    const reply = await engine.chat.completions.create({
 
-messages.push({
-  role: "assistant",
-  content: cleanAnswer
-});
-turnCount++;
+      messages: [
 
-addMessage(
-  "BLACK BOX",
-  cleanAnswer,
-  "ai"
-);
+        {
+          role: "system",
+          content:
+            SYSTEM_PROMPT +
+            "\n\n" +
+            problemLock +
+            "\n\n" +
+            stageInstruction
+        },
 
-} catch (error) {
+        ...messages.slice(1)
 
-  console.error(error);
-    
+      ],
+
+      temperature: 0.2,
+
+      max_tokens: 100
+
+    });
+
+
+    let answer =
+      reply?.choices?.[0]?.message?.content || "";
+
+
+    /* =====================================================
+       CLEAN MODEL OUTPUT
+       ===================================================== */
+
+    let cleanAnswer = cleanModelResponse(answer);
+
+
+    /* Fallback if model produces nothing useful */
+
+    if (!cleanAnswer) {
+
+      cleanAnswer =
+        "Let's start with one small step. What part of the problem do you understand already?";
+    }
+
+
+    /* Store assistant response */
+
+    messages.push({
+      role: "assistant",
+      content: cleanAnswer
+    });
+
+
+    turnCount++;
+
+
+    /* =====================================================
+       MOVE FROM NEW → GUIDE
+       ===================================================== */
+
+    if (reasoningStage === "NEW") {
+      reasoningStage = "GUIDE";
+    }
+
+
+    /* Display response */
+
     addMessage(
       "BLACK BOX",
-      "Something went wrong while generating the next reasoning step.",
+      cleanAnswer,
+      "ai"
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "BLACK BOX GENERATION ERROR:",
+      error
+    );
+
+    addMessage(
+      "BLACK BOX",
+      "I couldn't generate the next reasoning step. Please try that response again.",
       "ai"
     );
   }
+
 
   button.disabled = false;
   button.textContent = "SEND →";
@@ -315,18 +437,96 @@ addMessage(
 });
 
 
+/* =========================================================
+   CLEAN AI OUTPUT
+   ========================================================= */
+
+function cleanModelResponse(answer) {
+
+  if (!answer) {
+    return "";
+  }
+
+
+  let cleaned = String(answer);
+
+
+  /*
+   Remove complete <think>...</think> sections.
+  */
+
+  cleaned = cleaned.replace(
+    /<think>[\s\S]*?<\/think>/gi,
+    ""
+  );
+
+
+  /*
+   If the model starts a <think> block but does not
+   finish it before max_tokens, remove everything from
+   <think> onward.
+  */
+
+  if (cleaned.toLowerCase().includes("<think>")) {
+
+    cleaned =
+      cleaned.split(/<think>/i)[0];
+
+  }
+
+
+  /*
+   Remove any stray closing tag.
+  */
+
+  cleaned = cleaned.replace(
+    /<\/think>/gi,
+    ""
+  );
+
+
+  /*
+   Remove accidental role labels.
+  */
+
+  cleaned = cleaned.replace(
+    /^(assistant|black box)\s*:\s*/i,
+    ""
+  );
+
+
+  /*
+   Remove excessive whitespace.
+  */
+
+  cleaned = cleaned.trim();
+
+
+  return cleaned;
+}
+
+
+/* =========================================================
+   ADD MESSAGE TO CHAT
+   ========================================================= */
+
 function addMessage(label, text, type) {
 
-  const message = document.createElement("div");
+  const message =
+    document.createElement("div");
 
-  message.className = `message ${type}`;
+  message.className =
+    `message ${type}`;
+
 
   message.innerHTML = `
     <div class="message-label">${label}</div>
     <p>${escapeHTML(text)}</p>
   `;
 
+
   chat.appendChild(message);
+
 
   window.scrollTo({
     top: document.body.scrollHeight,
@@ -336,169 +536,190 @@ function addMessage(label, text, type) {
 }
 
 
+/* =========================================================
+   HTML SAFETY
+   ========================================================= */
+
 function escapeHTML(text) {
 
-  const div = document.createElement("div");
+  const div =
+    document.createElement("div");
 
   div.textContent = text;
 
   return div.innerHTML;
-
 }
+
+
+/* =========================================================
+   ADAPTIVE REASONING STAGES
+   ========================================================= */
 
 function getStageInstruction() {
 
-if (reasoningStage === "NEW") {
-  return `
+
+  /* -------------------------------------------------------
+     NEW PROBLEM
+     ------------------------------------------------------- */
+
+  if (reasoningStage === "NEW") {
+
+    return `
+
 CURRENT STAGE: NEW PROBLEM
 
-The user has just given you a problem.
+The person has just given you a problem.
 
-Speak directly and naturally to the user.
+Speak directly and naturally.
 
-Be polite, warm, and encouraging. You may use brief phrases such as:
-- "Good question."
-- "Let's start with one small step."
-- "You're on the right track."
-- "That's a useful starting point."
+Do NOT give the final answer.
 
-However, encouragement must NEVER replace actual reasoning.
+Do NOT solve the problem.
 
-DO NOT:
-- describe the user in third person
-- say "The user needs to..."
-- say "The user should..."
-- say "The user is asking..."
-- give the final answer
-- explain the whole solution
-- solve the problem for them
+Do NOT explain the whole solution.
 
 Give exactly ONE useful reasoning step.
 
-For example, if the user asks:
+The step must depend on the actual problem.
+
+For example, if the problem is:
+
 "What is 10/2?"
 
-A good response would be:
-"Good question. Let's start with one small step: what does division mean here? What are you trying to find?"
+A suitable response is:
 
-The response should feel like a helpful human tutor, while still making the user do the thinking.
+"Let's start with one small step: what does dividing 10 by 2 mean?"
 
-Never reveal the answer in the first response.
+Do not reveal the answer.
+
+Keep the response short.
+
 `;
-}
+  }
+
+
+  /* -------------------------------------------------------
+     GUIDE
+     ------------------------------------------------------- */
 
   if (reasoningStage === "GUIDE") {
+
     return `
 
 CURRENT STAGE: GUIDE
 
-Read the person's actual response carefully.
+Read the person's latest response carefully.
 
-Your job is to help them make ONE step of genuine progress.
-
-FIRST:
 Decide whether their response is:
+
 - correct
 - partly correct
 - incorrect
 - unclear
 - stuck
 
-THEN adapt your response.
+Then adapt your response.
+
 
 IF CORRECT:
-- Say specifically what they got right.
-- Give the next useful reasoning task.
-- Do not repeat what they already figured out.
+
+- Briefly acknowledge exactly what they got right.
+- Move forward.
+- Give ONE next reasoning task.
+- Do not repeat something they already solved.
+
 
 IF PARTLY CORRECT:
+
 - Keep the correct part.
-- Point out what is missing or needs changing.
-- Give one concrete clue.
+- Identify what is missing.
+- Give ONE concrete clue.
+
 
 IF INCORRECT:
-- Do not agree with it.
-- Briefly explain what needs reconsidering.
-- Give one concrete clue.
-- Do not reveal the final answer yet.
+
+- Do not agree with the incorrect idea.
+- Briefly identify what needs reconsidering.
+- Give ONE concrete clue.
+- Do not reveal the final answer.
+
 
 IF UNCLEAR:
-- Ask one simple question that makes the unclear part clearer.
+
+Ask ONE simple clarifying question.
+
 
 IF STUCK:
-This is especially important.
 
-If the person says:
+If they say:
+
 "I don't know"
 "idk"
 "I'm stuck"
 "help"
 "I can't"
-or asks for simpler language:
 
 DO NOT:
+
 - repeat the previous question
 - rephrase the previous question
-- ask another vague question
-- say "What's the next step?"
-- say "What are you trying to find?"
+- ask "what is the next step?"
+- ask "what are you trying to find?"
 - give generic encouragement
-- give the final answer immediately
+- immediately give the answer
 
-INSTEAD:
-Give a concrete clue based on the actual problem.
+Instead, change approach.
 
-Choose ONE:
-- a simple example
-- a smaller version of the problem
-- a useful definition
-- a comparison
-- a choice between a few possibilities
-- the first part of a method
-- a key piece of information
+Give ONE concrete clue.
 
-The clue must make the next step easier to see.
+Choose the most useful option:
 
-IMPORTANT:
-Never ask a question that is essentially the same as the previous question.
+- simple example
+- smaller version of the problem
+- useful definition
+- comparison
+- choice between possibilities
+- first part of a method
+- key piece of information
 
-For example:
+The clue must depend on the actual problem.
 
-BAD:
-"How would you solve 10/2?"
-"I don't know."
-"What are you trying to find?"
-"I don't know."
-"What is the next step?"
-
-GOOD:
-"How would you solve 10/2?"
-"I don't know."
-"Think about sharing 10 things equally between 2 groups. How many would go in each group?"
-
-The exact clue must change depending on the actual problem.
-
-Do not assume the problem is mathematics.
-
-For science, writing, research, decisions, planning, logic, or other tasks, choose a clue appropriate to that task.
+Do not assume this is mathematics.
 
 Keep the response concise.
 
-Never give a complete solution unless the person has genuinely reached the conclusion themselves.
-`;
-}
-
-  if (reasoningStage === "SOLVED") {
-    return `
-CURRENT STAGE: SOLVED
-
-The user has reached a valid conclusion.
-
-Briefly confirm the conclusion and explain why it is correct.
-Do not introduce unnecessary new steps.
 `;
   }
 
+
+  /* -------------------------------------------------------
+     SOLVED
+     ------------------------------------------------------- */
+
+  if (reasoningStage === "SOLVED") {
+
+    return `
+
+CURRENT STAGE: SOLVED
+
+The person has reached a valid conclusion.
+
+Briefly confirm the conclusion.
+
+Explain why it works in one short sentence.
+
+Do not add unnecessary steps.
+
+`;
+  }
+
+
   return "";
 }
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
 startAI();
