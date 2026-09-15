@@ -201,8 +201,8 @@ async function startAI() {
 
   try {
 
- engine = await CreateMLCEngine(
-  "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+engine = await CreateMLCEngine(
+  "Qwen3-0.6B-q4f16_1-MLC",
     {
       initProgressCallback: (progress) => {
         console.log(progress);
