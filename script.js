@@ -202,7 +202,7 @@ async function startAI() {
   try {
 
 engine = await CreateMLCEngine(
-"Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+"Qwen3-0.6B-q4f16_1-MLC",
     {
       initProgressCallback: (progress) => {
         console.log(progress);
@@ -278,8 +278,8 @@ const reply = await engine.chat.completions.create({
     },
     ...messages.slice(1)
   ],
-  temperature: 0.7,
-  max_tokens: 300
+  temperature: 0.4,
+  max_tokens: 120
 });
 const answer = reply.choices[0].message.content;
 
