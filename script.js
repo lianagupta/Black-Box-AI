@@ -1,5 +1,5 @@
 import { CreateMLCEngine } from
-"https://esm.run/@mlc-ai/web-llm";
+"https://esm.run/@mlc-ai/web-llm@0.2.82";
 
 const form = document.getElementById("chat-form");
 const input = document.getElementById("user-input");
