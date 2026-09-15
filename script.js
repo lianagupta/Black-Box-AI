@@ -201,8 +201,8 @@ async function startAI() {
 
   try {
 
-  engine = await CreateMLCEngine(
-    "Qwen3-0.6B-q4f16_1-MLC",
+ engine = await CreateMLCEngine(
+  "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
     {
       initProgressCallback: (progress) => {
         console.log(progress);
@@ -388,19 +388,104 @@ Never reveal the answer in the first response.
 
   if (reasoningStage === "GUIDE") {
     return `
+
 CURRENT STAGE: GUIDE
 
-The user has responded to your previous reasoning task.
+Read the person's actual response carefully.
 
-Your job:
-- Evaluate the user's reasoning carefully.
-- Decide whether it is correct, partially correct, incorrect, or unclear.
-- Do NOT blindly praise the user.
-- Do NOT give the final answer unless the user has genuinely reached it.
-- Give exactly ONE next reasoning task.
-- Make the next task depend on what the user actually said.
+Your job is to help them make ONE step of genuine progress.
+
+FIRST:
+Decide whether their response is:
+- correct
+- partly correct
+- incorrect
+- unclear
+- stuck
+
+THEN adapt your response.
+
+IF CORRECT:
+- Say specifically what they got right.
+- Give the next useful reasoning task.
+- Do not repeat what they already figured out.
+
+IF PARTLY CORRECT:
+- Keep the correct part.
+- Point out what is missing or needs changing.
+- Give one concrete clue.
+
+IF INCORRECT:
+- Do not agree with it.
+- Briefly explain what needs reconsidering.
+- Give one concrete clue.
+- Do not reveal the final answer yet.
+
+IF UNCLEAR:
+- Ask one simple question that makes the unclear part clearer.
+
+IF STUCK:
+This is especially important.
+
+If the person says:
+"I don't know"
+"idk"
+"I'm stuck"
+"help"
+"I can't"
+or asks for simpler language:
+
+DO NOT:
+- repeat the previous question
+- rephrase the previous question
+- ask another vague question
+- say "What's the next step?"
+- say "What are you trying to find?"
+- give generic encouragement
+- give the final answer immediately
+
+INSTEAD:
+Give a concrete clue based on the actual problem.
+
+Choose ONE:
+- a simple example
+- a smaller version of the problem
+- a useful definition
+- a comparison
+- a choice between a few possibilities
+- the first part of a method
+- a key piece of information
+
+The clue must make the next step easier to see.
+
+IMPORTANT:
+Never ask a question that is essentially the same as the previous question.
+
+For example:
+
+BAD:
+"How would you solve 10/2?"
+"I don't know."
+"What are you trying to find?"
+"I don't know."
+"What is the next step?"
+
+GOOD:
+"How would you solve 10/2?"
+"I don't know."
+"Think about sharing 10 things equally between 2 groups. How many would go in each group?"
+
+The exact clue must change depending on the actual problem.
+
+Do not assume the problem is mathematics.
+
+For science, writing, research, decisions, planning, logic, or other tasks, choose a clue appropriate to that task.
+
+Keep the response concise.
+
+Never give a complete solution unless the person has genuinely reached the conclusion themselves.
 `;
-  }
+}
 
   if (reasoningStage === "SOLVED") {
     return `
